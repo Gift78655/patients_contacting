@@ -68,6 +68,18 @@ app.get('/health', (req, res) => {
   res.status(200).send('Server is healthy!');
 });
 
+// Test database connection
+app.get('/api/test-db-connection', (req, res) => {
+  db.query('SELECT 1', (err, result) => {
+    if (err) {
+      console.error('❌ Database connection failed:', err.message);
+      res.status(500).json({ error: 'Failed to connect to the database' });
+    } else {
+      res.status(200).json({ message: 'Database connection successful!' });
+    }
+  });
+});
+
 // Fetch patient details by ID
 app.get('/api/patient/:id', (req, res) => {
   const patientId = req.params.id;
