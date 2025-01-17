@@ -7,7 +7,7 @@ const twilio = require('twilio');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-require('dotenv').config();
+require('dotenv').config(); // Ensure environment variables are loaded
 
 const app = express();
 app.use(cors());
@@ -19,7 +19,7 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
 
-// Serve static files
+// Serve static files for uploaded files
 app.use('/uploads', express.static(uploadsDir));
 
 // Twilio configuration
@@ -46,18 +46,18 @@ const upload = multer({
 
 // MySQL Database configuration (cloud hosted)
 const db = mysql.createConnection({
-  host: '34.35.53.111', // Online database host (Google Cloud SQL public IP)
-  user: 'app-user', // MySQL username
-  password: 'mthombenigift45@', // MySQL password
-  database: 'healthcare_management_system', // Database name
-  port: 3306, // MySQL port
+  host: process.env.DB_HOST || '34.35.53.111', // Cloud MySQL host
+  user: process.env.DB_USER || 'app-user', // MySQL username
+  password: process.env.DB_PASSWORD || 'mthombenigift45@', // MySQL password
+  database: process.env.DB_NAME || 'healthcare_management_system', // Database name
+  port: process.env.DB_PORT || 3306, // MySQL port
 });
 
 // Connect to the database
 db.connect((err) => {
   if (err) {
     console.error('❌ Database connection failed:', err.message);
-    process.exit(1);
+    process.exit(1); // Exit process if connection fails
   } else {
     console.log('✅ Connected to the MySQL database.');
   }
@@ -75,11 +75,12 @@ app.get('/api/patient/:id', (req, res) => {
 
   db.query(query, [patientId], (err, result) => {
     if (err) {
-      res.status(500).json({ error: 'Database query error' });
+      console.error('❌ Database query error:', err);
+      return res.status(500).json({ error: 'Database query error' });
     } else if (result.length === 0) {
-      res.status(404).json({ error: 'Patient not found' });
+      return res.status(404).json({ error: 'Patient not found' });
     } else {
-      res.status(200).json(result[0]);
+      return res.status(200).json(result[0]);
     }
   });
 });
@@ -107,7 +108,7 @@ app.post('/api/send-email', upload.single('file'), (req, res) => {
   transporter.sendMail(mailOptions, (err, info) => {
     if (err) {
       console.error('❌ Error sending email:', err.message);
-      res.status(500).json({ error: 'Failed to send email' });
+      return res.status(500).json({ error: 'Failed to send email' });
     } else {
       console.log('✅ Email sent successfully:', info.response);
 
@@ -119,7 +120,7 @@ app.post('/api/send-email', upload.single('file'), (req, res) => {
         });
       }
 
-      res.status(200).json({ message: 'Email sent successfully', info });
+      return res.status(200).json({ message: 'Email sent successfully', info });
     }
   });
 });
