@@ -44,12 +44,13 @@ const upload = multer({
   }),
 });
 
-// MySQL Database configuration
+// MySQL Database configuration (cloud hosted)
 const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: '34.35.53.111', // Online database host (Google Cloud SQL public IP)
+  user: 'app-user', // MySQL username
+  password: 'mthombenigift45@', // MySQL password
+  database: 'healthcare_management_system', // Database name
+  port: 3306, // MySQL port
 });
 
 // Connect to the database
